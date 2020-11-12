@@ -10,7 +10,8 @@ def chunks(lst, n):
 
 cdf = pd.read_csv(r'https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv')
 
-pdf = pd.read_excel(r'population.xlsx')
+population_path = os.path.abspath(r'population.xlsx')
+pdf = pd.read_excel(population_path)
 
 pdf_fixed = pdf[pdf['COUNTY'] != 0]
 
