@@ -32,6 +32,7 @@ with doc.tag("body"):
             with doc.tag('li'):
                 doc.line('a', f'{state}', href = f'plots\\{state}\\index.html')                    
             state_doc = yattag.Doc()
+            state_doc.line('h1', f'{state} Counties')
             state_path = os.path.join('plots', state)
             with state_doc.tag('table'):        
                 
@@ -46,9 +47,9 @@ with doc.tag("body"):
                             ymin = 0
                             ymax = 15
                             county_df = state_df[state_df['county'] == county]
-                            county_df['per_100k_ra'] = county_df['per_100k'].rolling(7).mean()
+                            # county_df['per_100k_ra'] = county_df['per_100k'].rolling(7).mean()
                             county_df['new_cases'] = county_df['per_100k'].diff()
-                            county_df['new_cases_ra'] = county_df['new_cases'].rolling(7).mean()
+                            county_df['new_cases_ra'] = county_df['new_cases'].rolling(14).mean()
                             county_path = os.path.join(state_path, county)
 
                             print (county_path)
@@ -75,9 +76,11 @@ with doc.tag("body"):
 
                             #plt.axhline(y = county_df['new_cases'].iloc[-1], linestyle='dashed', color = 'blue')
                             plt.axhline(y = county_df['new_cases_ra'].iloc[-1], linestyle='dashed', color = 'black')
+                            plt.axhline(y = county_df['new_cases_ra'].iloc[-7], linestyle='dotted', color = 'black')
 
                             yticks = list(plt.yticks()[0])
-                            yticks.append(county_df['new_cases'].iloc[-1])
+                            yticks.append(county_df['new_cases_ra'].iloc[-1])
+                            yticks.append(county_df['new_cases_ra'].iloc[-7])
 
                             yticks = sorted(yticks)
                             plt.yticks(yticks)
@@ -89,6 +92,7 @@ with doc.tag("body"):
                             
                             
                             plt.savefig(f'{county_path}.png')      
+                            state_doc.line('a', county, f'#{county}')
                             state_doc.stag('img', src=f'{county}.png')  
                             # plt.show()
                             plt.clf()
