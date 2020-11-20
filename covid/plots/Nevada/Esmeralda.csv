@@ -1,4 +1,8 @@
-,date,county,state,fips,cases,deaths,COUNTY,STNAME,CTYNAME,POPESTIMATE2019,per_100k,new_cases
-712160,2020-11-13,Esmeralda,Nevada,32009.0,1,0,9,Nevada,Esmeralda,873,114.5475372279496,
-712161,2020-11-14,Esmeralda,Nevada,32009.0,1,0,9,Nevada,Esmeralda,873,114.5475372279496,0.0
-712162,2020-11-15,Esmeralda,Nevada,32009.0,3,0,9,Nevada,Esmeralda,873,343.64261168384877,229.09507445589918
+,date,county,state,fips,cases,deaths,COUNTY,STNAME,CTYNAME,POPESTIMATE2019,cases_per_100k,deaths_per_100k,death_rate,new_cases,new_deaths
+724684,2020-11-13,Esmeralda,Nevada,32009.0,1,0,9,Nevada,Esmeralda,873,114.5475372279496,0.0,0.0,,
+724685,2020-11-14,Esmeralda,Nevada,32009.0,1,0,9,Nevada,Esmeralda,873,114.5475372279496,0.0,0.0,0.0,0.0
+724686,2020-11-15,Esmeralda,Nevada,32009.0,3,0,9,Nevada,Esmeralda,873,343.64261168384877,0.0,0.0,229.09507445589918,0.0
+724687,2020-11-16,Esmeralda,Nevada,32009.0,5,0,9,Nevada,Esmeralda,873,572.737686139748,0.0,0.0,229.09507445589924,0.0
+724688,2020-11-17,Esmeralda,Nevada,32009.0,5,0,9,Nevada,Esmeralda,873,572.737686139748,0.0,0.0,0.0,0.0
+724689,2020-11-18,Esmeralda,Nevada,32009.0,5,0,9,Nevada,Esmeralda,873,572.737686139748,0.0,0.0,0.0,0.0
+724690,2020-11-19,Esmeralda,Nevada,32009.0,5,0,9,Nevada,Esmeralda,873,572.737686139748,0.0,0.0,0.0,0.0
