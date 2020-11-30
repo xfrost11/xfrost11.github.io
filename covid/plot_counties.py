@@ -172,7 +172,10 @@ with doc.tag("body"):
 
 
                             
-                            plt.savefig(f'{county_path}.png')      
+                            try:
+                                plt.savefig(f'{county_path}.png')      
+                            except:
+                                print (f'Problem writing: {county_path} plot')
                             state_doc.line('a', county, id=f'#{county}')
                             state_doc.stag('img', src=f'{county}.png')  
                             # plt.show()
