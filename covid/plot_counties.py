@@ -2,6 +2,7 @@ import pandas as pd
 import pylab as plt
 import os
 import yattag
+import csv
 
 def chunks(lst, n):
     """Yield successive n-sized chunks from lst."""
@@ -28,11 +29,14 @@ mdf['death_rate'] = mdf['deaths'] / mdf['cases']
 print (mdf)
 mean_len = 7
 
+ff = open('infected.csv', 'w', newline='')
+writer = csv.writer(ff)
 doc = yattag.Doc()
 with doc.tag("body"):    
     with doc.tag('ul'):
         states = sorted(mdf['state'].unique())
         for state in states:
+        #for state in ['California']:
             with doc.tag('li'):
                 doc.line('a', f'{state}', href = f'plots\\{state}\\index.html')                    
             state_doc = yattag.Doc()
@@ -51,23 +55,28 @@ with doc.tag("body"):
                             
                             county_df = state_df[state_df['county'] == county].copy(deep=True)
                             # county_df['per_100k_ra'] = county_df['per_100k'].rolling(7).mean()
-                            county_df['new_cases'] = county_df['cases_per_100k'].diff()
+                            county_df['new_cases'] = county_df['cases'].diff()
+                            county_df['new_cases_per_100k'] = county_df['cases_per_100k'].diff()
                             county_df['new_deaths'] = county_df['deaths_per_100k'].diff()
                             if len(county_df) > mean_len:
-                                county_df['new_cases_ra'] = county_df['new_cases'].rolling(mean_len).mean()
+                                county_df['new_cases_per_100k_ra'] = county_df['new_cases_per_100k'].rolling(mean_len).mean()
                                 county_df['new_deaths_ra'] = county_df['new_deaths'].rolling(mean_len).mean()
+                                county_df['active_cases'] = county_df['new_cases'].rolling(8).sum()
+                                county_df['infected_to_one'] = 1.0 / (county_df['active_cases'].multiply(4) / county_df['POPESTIMATE2019'])
+                                rr = county_df.iloc[-1]
+                                writer.writerow([rr['state'], rr['county'], rr['infected_to_one']])
                             county_path = os.path.join(state_path, county)
 
                             print (county_path)
 
-                            plt.figure(figsize=(20, 20))
+                            plt.figure(figsize=(30, 25))
                             ymin = 0
                             ymax = 15
-                            ax = plt.subplot(2, 2, 1)
+                            ax = plt.subplot(3, 2, 1)
 
-                            county_df.plot(x='date', y='new_cases', ax=ax, color = 'blue')
+                            county_df.plot(x='date', y='new_cases_per_100k', ax=ax, color = 'blue')
                             if len(county_df) > mean_len:
-                                county_df.plot(x='date', y='new_cases_ra', ax=ax, color = 'black')
+                                county_df.plot(x='date', y='new_cases_per_100k_ra', ax=ax, color = 'black')
                             plt.title(f'{state} - {county} - Cases per 100k')
 
                             plt.xlabel('')
@@ -82,27 +91,26 @@ with doc.tag("body"):
                             plt.axhspan(1, 4, color = "orange", alpha = 0.5)
                             plt.axhspan(ymin, 1, color = "yellow", alpha = 0.5)
 
-                            #plt.axhline(y = county_df['new_cases'].iloc[-1], linestyle='dashed', color = 'blue')
+                            #plt.axhline(y = county_df['new_cases_per_100k'].iloc[-1], linestyle='dashed', color = 'blue')
                             if len(county_df) > mean_len:
-                                plt.axhline(y = county_df['new_cases_ra'].iloc[-1], linestyle='dashed', color = 'black')                            
-                                plt.axhline(y = county_df['new_cases_ra'].iloc[-7], linestyle='dotted', color = 'black')
+                                plt.axhline(y = county_df['new_cases_per_100k_ra'].iloc[-1], linestyle='dashed', color = 'black')                            
+                                plt.axhline(y = county_df['new_cases_per_100k_ra'].iloc[-7], linestyle='dotted', color = 'black')
 
                             yticks = list(plt.yticks()[0])
                             if len(county_df) > mean_len:
-                                yticks.append(county_df['new_cases_ra'].iloc[-1])
-                                yticks.append(county_df['new_cases_ra'].iloc[-7])
+                                yticks.append(county_df['new_cases_per_100k_ra'].iloc[-1])
+                                yticks.append(county_df['new_cases_per_100k_ra'].iloc[-7])
 
                             yticks = sorted(yticks)
                             plt.yticks(yticks)
 
                             plt.ylabel('Cases per 100k')
-                            plt.subplots_adjust(bottom=0.15)
                             plt.grid()
                             plt.ylim(ymin, ymax)
 
                             ymin = 0
                             ymax = 0
-                            ax = plt.subplot(2, 2, 2)
+                            ax = plt.subplot(3, 2, 2)
                             county_df.plot(x='date', y='new_deaths', ax=ax, color = 'blue')
                             if len(county_df) > mean_len:
                                 county_df.plot(x='date', y='new_deaths_ra', ax=ax, color = 'black')
@@ -128,7 +136,6 @@ with doc.tag("body"):
                             plt.yticks(yticks)
 
                             plt.ylabel('Deaths per 100k')
-                            plt.subplots_adjust(bottom=0.15)
                             plt.grid()
                             plt.ylim(ymin, ymax)
 
@@ -136,7 +143,7 @@ with doc.tag("body"):
 
                             ymin = 0
                             ymax = 0
-                            ax = plt.subplot(2, 2, 3)
+                            ax = plt.subplot(3, 2, 3)
                             county_df.plot(x='cases', y='deaths', ax=ax, color = 'blue')
                             plt.title(f'{state} - {county} - Deaths vs Cases')                            
                             plt.xticks(rotation =45, fontsize='small')
@@ -146,7 +153,6 @@ with doc.tag("body"):
 
                             plt.ylabel('Deaths')
                             plt.xlabel('Cases')
-                            plt.subplots_adjust(bottom=0.15)
                             plt.grid()
                             plt.ylim(ymin, ymax)
 
@@ -154,7 +160,7 @@ with doc.tag("body"):
 
                             ymin = 0
                             ymax = 0
-                            ax = plt.subplot(2, 2, 4)
+                            ax = plt.subplot(3, 2, 4)
                             county_df.plot(x='date', y='death_rate', ax=ax, color = 'blue')
                             plt.title(f'{state} - {county} - Death Rate')                            
                             plt.xticks(rotation =45, fontsize='small')
@@ -164,9 +170,52 @@ with doc.tag("body"):
 
                             plt.ylabel('Deaths')
                             plt.xlabel('')
-                            plt.subplots_adjust(bottom=0.15)
+                            
                             plt.grid()
                             plt.ylim(ymin, ymax)
+
+
+                            ymin = 0
+                            ymax = 0
+                            ax1 = plt.subplot(3, 2, 5)
+                            county_df.plot(x='date', y='new_cases_per_100k_ra', ax=ax1, color = 'blue')                            
+                            plt.title(f'{state} - {county} - Case to Death Phase Lag')                            
+                            plt.xticks(rotation =45, fontsize='small')
+
+                            ax2 = ax1.twinx()
+                            county_df.plot(x='date', y='new_deaths_ra', ax=ax2, color = 'red')
+
+                                                                          
+                            # xmin, xmax = plt.xlim()  
+                            # ymin_T, ymax_T = plt.ylim()
+                            # ymax = max(ymax, ymax_T)
+
+                            plt.ylabel('Deaths')
+                            plt.xlabel('')
+                            
+                            plt.grid()
+                            # plt.ylim(ymin, ymax)
+
+                            ymin = 0
+                            ymax = 0
+                            ax1 = plt.subplot(3, 2, 6)
+                            county_df.loc[county_df['date'] > '2020-05-01'].plot(x='date', y='infected_to_one', ax=ax1, color = 'red')                            
+                            plt.title(f'{state} - {county} - 1 in X Cases')                            
+                            plt.xticks(rotation =45, fontsize='small')
+                            if len(county_df) > 8:
+                                plt.axhline(y = county_df['infected_to_one'].iloc[-1], linestyle='dashed', color = 'black')                                       
+                                yticks = list(plt.yticks()[0])
+                                yticks.append(county_df['infected_to_one'].iloc[-1])
+                                yticks = sorted(yticks)
+                                plt.yticks(yticks)
+
+                            plt.ylabel('Cases')
+                            plt.xlabel('')                            
+                            plt.grid()
+
+
+                            plt.subplots_adjust(bottom=0.15)
+
 
 
 
@@ -186,7 +235,8 @@ with doc.tag("body"):
                 f.write(state_doc.getvalue())
 with open('index.html', 'w') as f:
     f.write(doc.getvalue())      
-    
+
+ff.close()    
 
 
 
